@@ -2161,32 +2161,55 @@ window.switchAdminTab = function(tabName) {
 
     async function handleHashRoute() {
       const hash = location.hash;
-      const currentStudentKey = localStorage.getItem(STORAGE_KEYS.currentStudent);
-      const currentStudent = getCurrentStudentRecord();
+      const currentStudentSession = localStorage.getItem(STORAGE_KEYS.currentStudent);
+      let currentStudent = null;
 
-      // Real-time security check for students
-      if (currentStudentKey && currentStudent && !hash.startsWith("#admin")) {
+      try {
+        currentStudent = currentStudentSession ? JSON.parse(currentStudentSession) : null;
+      } catch (error) {
+        currentStudent = null;
+      }
+
+      const currentStudentKey = currentStudent?.normalizedName || currentStudentSession;
+      const currentStudentRecord = currentStudent || getCurrentStudentRecord();
+
+      if (currentStudentKey && currentStudentRecord && !hash.startsWith("#admin")) {
         try {
-          const storedSecretCode = currentStudent.secretCode || currentStudent.secret_code;
-          let query = supabaseClient
-            .from("students_whitelist")
-            .select("id, name, grade_id, secret_code")
-            .eq("grade_id", Number(currentStudent.gradeId));
+          const client = typeof supabaseClient !== "undefined" ? supabaseClient : (typeof _supabase !== "undefined" ? _supabase : null);
+          let data = null;
+          let error = null;
 
-          if (storedSecretCode) {
-            query = query.eq("secret_code", String(storedSecretCode).trim());
+          if (currentStudent?.normalizedName && currentStudent?.grade && currentStudent?.secretCode) {
+            const response = await client
+              .from("students_whitelist")
+              .select("id")
+              .eq("normalized_name", currentStudent.normalizedName)
+              .eq("grade", currentStudent.grade)
+              .eq("secret_code", currentStudent.secretCode)
+              .single();
+
+            data = response.data;
+            error = response.error;
+          } else {
+            const response = await client
+              .from("students_whitelist")
+              .select("id, name, grade_id, secret_code")
+              .eq("grade_id", Number(currentStudentRecord.gradeId));
+
+            error = response.error;
+            data = response.data?.find((student) => normalizeName(student.name) === currentStudentKey) || null;
           }
 
-          const { data, error } = storedSecretCode ? await query.single() : await query;
-          const matchingRows = storedSecretCode ? (data ? [data] : []) : (Array.isArray(data) ? data : []);
-          const hasMatchingStudent = matchingRows.some((student) => normalizeName(student.name) === currentStudentKey);
-
-          if (error || !hasMatchingStudent) {
+          if (error || !data) {
             alert("عذراً، انتهت صلاحية الجلسة أو تم تعديل صلاحياتك. يرجى تسجيل الدخول مجدداً.");
             localStorage.removeItem(STORAGE_KEYS.currentStudent);
             state.currentStudentKey = "";
             location.hash = "";
-            openStudentPrompt();
+            if (typeof showAuthModal === "function") {
+              showAuthModal();
+            } else {
+              openStudentPrompt();
+            }
             return;
           }
         } catch (err) {

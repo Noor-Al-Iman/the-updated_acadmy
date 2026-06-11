@@ -1,7 +1,2 @@
-// Environment configuration - loads from global window object or injected process env
-const processEnv = typeof process !== "undefined" ? process.env : undefined;
-
-window.ENV = {
-  SUPABASE_URL: processEnv?.SUPABASE_URL || window.ENV?.SUPABASE_URL || '',
-  SUPABASE_ANON_KEY: processEnv?.SUPABASE_ANON_KEY || window.ENV?.SUPABASE_ANON_KEY || '',
-};
+window.SUPABASE_URL = 'https://glbjeszhpfxtevwhcrfi.supabase.co';
+window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsYmplc3pocGZ4dGV2d2hjcmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjIxNTYsImV4cCI6MjA5MTQzODE1Nn0.73Xx1oguCnQGqgn4GyIi34kSVF8dOYtl7fJLOyw6J-U';

@@ -1,13 +1,10 @@
-    // غيّر كلمة المرور الافتراضية هنا عند الحاجة.
-    // --- إعدادات الربط بقاعدة بيانات Supabase ---
-    const supabaseUrl = window.ENV?.SUPABASE_URL || 'YOUR_SUPABASE_URL';
-    const supabaseAnonKey = window.ENV?.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
-    const isSupabaseConfigured = supabaseUrl !== 'YOUR_SUPABASE_URL' && supabaseAnonKey !== 'YOUR_ANON_KEY';
-    if (!isSupabaseConfigured) {
-      console.error('Missing Supabase environment configuration. Set SUPABASE_URL and SUPABASE_ANON_KEY before using the platform.');
-    }
-    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-    // ---------------------------------------------
+// --- إعدادات الربط بقاعدة بيانات Supabase ---
+const supabaseUrl = window.SUPABASE_URL;
+const supabaseAnonKey = window.SUPABASE_ANON_KEY;
+// بناء الاتصال المباشر بالسيرفر
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+const studentPromptOverlay = document.getElementById("studentPromptOverlay");
+
 
     const STORAGE_KEYS = {
       catalog: "edu-platform-catalog-v4",
@@ -149,7 +146,6 @@
     const backButton = document.getElementById("backButton");
     const homeButton = document.getElementById("homeButton");
     const studentBadge = document.getElementById("studentBadge");
-    const studentPromptOverlay = document.getElementById("studentPromptOverlay");
     const studentNameInput = document.getElementById("studentNameInput");
     const studentGradeInput = document.getElementById("studentGradeInput");
     const studentPromptError = document.getElementById("studentPromptError");
